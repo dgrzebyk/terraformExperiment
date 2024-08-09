@@ -14,6 +14,10 @@ provider "google-beta" {
   zone    = var.zone
 }
 
+variable "project" {
+  default = "tf-experiment-426707"
+}
+
 variable "region" {
   default = "europe-west3"
 }

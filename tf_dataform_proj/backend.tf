@@ -7,7 +7,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "tf-experiment-426707_terraform"
+    bucket = "${var.project}_tf_state"
     prefix = ""
   }
 }
