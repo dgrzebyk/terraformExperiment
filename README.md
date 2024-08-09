@@ -34,7 +34,7 @@ Local state is created using ``terraform init``, it is well described by the [of
 
 >After you initialize, Terraform creates a .terraform/ directory locally. This directory 
 contains the most recent backend configuration, including any authentication parameters you 
-provided to the Terraform CLI. **Do not check this directory into Git**, as it may contain sensitive 
+provided to the Terraform CLI. Do not check this directory into Git, as it may contain sensitive 
 credentials for your remote backend.
 > 
 >The local backend configuration is different and entirely separate from the terraform.tfstate file 
@@ -63,8 +63,8 @@ on Windows or`export TF_VAR_github_token=YOUR_github_token` on Linux/MacOS.
 4. create the defined infrastructure by running ``terraform apply -var-file=environment\dev.tfvars`` 
 from the `tf_dataform_proj` directory.
 
-## Cleaning up
-To destroy the infrastructure you can run `terraform destroy -var-file=environment\dev.tfvars` from
+## Clean up
+To destroy the infrastructure run `terraform destroy -var-file=environment\dev.tfvars` from
 the `tf_dataform_proj` directory. BigQuery tables have `force_delete=True` which ensures they 
 cannot be accidentally deleted by running `terraform destroy`. Similar is the case for the Dataform
 repository which cannot be removed because it contains nested resources (workflow and a release).
@@ -76,5 +76,4 @@ a backslash. For example, to destroy `allocation` BigQuery table you must run
 Resources unaffected by ``terraform destroy`` can be also removed manually in GCP UI.
 
 ## Contributions
-This document contains direct quotes from Terraform documentation, some of them might not be 
-referenced. This summary was written by Daniel Grzebyk. 
+This document contains direct quotes from Terraform documentation. It was written by Daniel Grzebyk. 
