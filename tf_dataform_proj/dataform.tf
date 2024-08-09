@@ -53,7 +53,7 @@ resource "google_dataform_repository_release_config" "release_config" {
   code_compilation_config {
     default_database = var.project
     default_schema   = "allocation"
-    default_location = var.region
+    default_location = local.region
     assertion_schema = "allocation_assertions"
     database_suffix  = ""
     schema_suffix    = ""
@@ -79,11 +79,11 @@ resource "google_dataform_repository_workflow_config" "workflow" {
 }
 
 # Create BigQuery tables to be populated by Dataform
-resource "google_bigquery_dataset" "bq_datasets" {
+resource "google_bigquery_dataset" "bigquery_datasets" {
   for_each      = toset(var.bq_datasets)
   dataset_id    = each.value
   friendly_name = each.value
-  location      = var.region
+  location      = local.region
   project       = var.project
 }
 

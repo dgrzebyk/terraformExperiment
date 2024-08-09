@@ -4,26 +4,24 @@
 
 provider "google" {
   project = var.project
-  region  = var.region
-  zone    = var.zone
+  region  = local.region
+  zone    = local.zone
 }
 
 provider "google-beta" {
   project = var.project
-  region  = var.region
-  zone    = var.zone
+  region  = local.region
+  zone    = local.zone
 }
+
+
+/******************************************
+	Variables and Locals
+ *****************************************/
 
 variable "project" {
-  default = "tf-experiment-426707"
-}
-
-variable "region" {
-  default = "europe-west3"
-}
-
-variable "zone" {
-  default = "europe-west3-a"
+  description = "GCP project name"
+  type        = string
 }
 
 variable "bq_datasets" {
@@ -31,7 +29,11 @@ variable "bq_datasets" {
 }
 
 variable "github_token" {
-  default     = "GitHub token"
   type        = string
   sensitive   = true
+}
+
+locals {
+  region  = "europe-west3"
+  zone    = "europe-west3-a"
 }
