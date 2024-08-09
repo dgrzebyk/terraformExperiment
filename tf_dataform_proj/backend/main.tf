@@ -27,13 +27,13 @@ provider "google" {
  *****************************************/
 
 resource "google_storage_bucket" "terraform_state" {
-  name                        = "${var.project}_terraform"
+  name                        = "${var.project}_tf_state"
   location                    = local.region
+  force_destroy               = true
+  public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
 
   versioning {
     enabled = true
   }
-
-  force_destroy = true
 }
