@@ -56,21 +56,21 @@ resource "google_storage_bucket_object" "cloud_function_ratios" {
   name   = "allocation_ratios.zip"
   bucket = google_storage_bucket.cf_allocation_upload.name
   # source - path to zip file containing the code from this repository root
-  source = "../cloud_functions/allocation_ratios.zip"
+  source = "cloud_functions/allocation_ratios.zip"
 }
 
-# Stores cloud function code in a GCS bucket
-resource "google_storage_bucket_object" "cloud_function_snp_a005" {
-  name   = "snp_a005.zip"
-  bucket = google_storage_bucket.cf_allocation_upload.name
-  # source - path to zip file containing the code from this repository root
-  source = "../cloud_functions/snp_a005.zip"
-}
-
-# Stores cloud function code in a GCS bucket
-resource "google_storage_bucket_object" "cloud_function_bq_to_txt" {
-  name   = "bq_to_txt.zip"
-  bucket = google_storage_bucket.cf_allocation_upload.name
-  # source - path to zip file containing the code from this repository root
-  source = "../cloud_functions/bq_to_txt.zip"
-}
+# # Stores cloud function code in a GCS bucket
+# resource "google_storage_bucket_object" "cloud_function_snp_a005" {
+#   name   = "snp_a005.zip"
+#   bucket = google_storage_bucket.cf_allocation_upload.name
+#   # source - path to zip file containing the code from this repository root
+#   source = "../cloud_functions/snp_a005.zip"
+# }
+#
+# # Stores cloud function code in a GCS bucket
+# resource "google_storage_bucket_object" "cloud_function_bq_to_txt" {
+#   name   = "bq_to_txt.zip"
+#   bucket = google_storage_bucket.cf_allocation_upload.name
+#   # source - path to zip file containing the code from this repository root
+#   source = "../cloud_functions/bq_to_txt.zip"
+# }

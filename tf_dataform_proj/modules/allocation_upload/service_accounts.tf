@@ -23,7 +23,7 @@ resource "google_pubsub_topic_iam_binding" "binding" {
   members = ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
 }
 
-resource "google_cloudfunctions2_function_iam_member" "invoker" {
+resource "google_cloudfunctions2_function_iam_member" "cf_invoker" {
   project        = google_cloudfunctions2_function.ratios_to_bq.project
   location       = google_cloudfunctions2_function.ratios_to_bq.location
   cloud_function = google_cloudfunctions2_function.ratios_to_bq.name
@@ -31,10 +31,18 @@ resource "google_cloudfunctions2_function_iam_member" "invoker" {
   member         = "serviceAccount:${google_service_account.cloud_functions.email}"
 }
 
-resource "google_cloud_run_service_iam_member" "cloud_run_invoker" {
-  project  = google_cloudfunctions2_function.snp_a005_to_bq.project
-  location = google_cloudfunctions2_function.snp_a005_to_bq.location
-  service  = google_cloudfunctions2_function.snp_a005_to_bq.name
-  role     = "roles/run.invoker"
-  member   = "serviceAccount:${google_service_account.cloud_storage.email}"
+resource "google_cloudfunctions2_function_iam_member" "run_invoker" {
+  project        = google_cloudfunctions2_function.ratios_to_bq.project
+  location       = google_cloudfunctions2_function.ratios_to_bq.location
+  cloud_function = google_cloudfunctions2_function.ratios_to_bq.name
+  role           = "roles/run.invoker"
+  member         = "serviceAccount:${google_service_account.cloud_functions.email}"
 }
+
+# resource "google_cloud_run_service_iam_member" "cloud_run_invoker" {
+#   project  = google_cloudfunctions2_function.snp_a005_to_bq.project
+#   location = google_cloudfunctions2_function.snp_a005_to_bq.location
+#   service  = google_cloudfunctions2_function.snp_a005_to_bq.name
+#   role     = "roles/run.invoker"
+#   member   = "serviceAccount:${google_service_account.cloud_storage.email}"
+# }
