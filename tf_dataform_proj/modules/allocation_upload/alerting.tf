@@ -5,8 +5,10 @@ resource "google_monitoring_notification_channel" "dataform_notification_channel
   display_name = "Dataform Notification Channel"
   type         = "email"
 
+  for_each = toset(var.alerting_google_group_emails)
+
   labels = {
-    email_address = "daniel.grzebyk@gmail.com"
+    email_address = each.value
   }
   force_delete = false
 }
@@ -25,7 +27,7 @@ resource "google_monitoring_alert_policy" "dataform_failure_alert_policy" {
     }
   }
 
-  notification_channels = ["${google_monitoring_notification_channel.dataform_notification_channel.id}"]
+  notification_channels = [for channel in google_monitoring_notification_channel.dataform_notification_channel : channel.name]
 
   documentation {
     content   = <<EOF
