@@ -23,6 +23,7 @@ resource "google_dataform_repository" "repository" {
   project  = var.project
   name     = "add_dimensions"
   region   = "europe-west3"
+  service_account = "${google_service_account.dataform.email}"
 
   git_remote_settings {
       url = "https://github.com/dgrzebyk/dataform.git"
@@ -47,8 +48,6 @@ resource "google_dataform_repository_release_config" "release_config" {
 
   name          = "main"
   git_commitish = "main"
-  cron_schedule = "0 9 * * WED"
-  time_zone     = "Europe/Brussels"
 
   code_compilation_config {
     default_database = var.project
@@ -74,8 +73,9 @@ resource "google_dataform_repository_workflow_config" "workflow" {
   name           = "add_dimensions"
   release_config = google_dataform_repository_release_config.release_config.id
 
-  cron_schedule   = "15 9 * * WED"
-  time_zone       = "Europe/Brussels"
+  invocation_config {
+    service_account = google_service_account.dataform.email
+  }
 }
 
 # Create BigQuery tables to be populated by Dataform
@@ -87,20 +87,31 @@ resource "google_bigquery_dataset" "bigquery_datasets" {
   project       = var.project
 }
 
-# Assign default Dataform service account a BigQuery Job User role
+
+/******************************************
+	Permissions
+ *****************************************/
+
+resource "google_project_iam_member" "dataform_editor" {
+  project    = var.project
+  role       = "roles/dataform.editor"
+  member     = "serviceAccount:${google_service_account.dataform.email}"
+}
+
+# Assign Dataform service account a BigQuery Job User role
 resource "google_project_iam_member" "bq_user" {
   provider = google-beta
   project  = var.project
   role     = "roles/bigquery.jobUser"
-  member   = "serviceAccount:service-104387202021@gcp-sa-dataform.iam.gserviceaccount.com"
+  member   = "serviceAccount:${google_service_account.dataform.email}"
 }
 
-# Assign default Dataform service account a BigQuery Data Editor role
+# Assign Dataform service account a BigQuery Data Editor role
 resource "google_project_iam_member" "data_editor" {
   provider = google-beta
   project  = var.project
   role     = "roles/bigquery.dataEditor"
-  member   = "serviceAccount:service-104387202021@gcp-sa-dataform.iam.gserviceaccount.com"
+  member   = "serviceAccount:${google_service_account.dataform.email}"
 }
 
 # Grant the service account access to read the secret
