@@ -1,0 +1,1 @@
+gcloud functions deploy bq_to_txt --gen2 --runtime python311 --region europe-west3 --source . --entry-point bq_to_txt --trigger-http
