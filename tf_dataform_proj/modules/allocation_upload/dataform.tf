@@ -1,22 +1,3 @@
-# Create the GitHub token secret
-resource "google_secret_manager_secret" "secret" {
-  provider  = google-beta
-  project   = var.project
-  secret_id = "github_token"
-
-  replication {
-    auto {}
-  }
-}
-
-# Add the token to the secret
-resource "google_secret_manager_secret_version" "secret_version" {
-  provider = google-beta
-  secret   = google_secret_manager_secret.secret.id
-
-  secret_data = var.github_token
-}
-
 # Link Dataform project with a GitHub repository
 resource "google_dataform_repository" "repository" {
   provider = google-beta
@@ -85,39 +66,4 @@ resource "google_bigquery_dataset" "bigquery_datasets" {
   friendly_name = each.value
   location      = local.region
   project       = var.project
-}
-
-
-/******************************************
-	Permissions
- *****************************************/
-
-resource "google_project_iam_member" "dataform_editor" {
-  project    = var.project
-  role       = "roles/dataform.editor"
-  member     = "serviceAccount:${google_service_account.dataform.email}"
-}
-
-# Assign Dataform service account a BigQuery Job User role
-resource "google_project_iam_member" "bq_user" {
-  provider = google-beta
-  project  = var.project
-  role     = "roles/bigquery.jobUser"
-  member   = "serviceAccount:${google_service_account.dataform.email}"
-}
-
-# Assign Dataform service account a BigQuery Data Editor role
-resource "google_project_iam_member" "data_editor" {
-  provider = google-beta
-  project  = var.project
-  role     = "roles/bigquery.dataEditor"
-  member   = "serviceAccount:${google_service_account.dataform.email}"
-}
-
-# Grant the service account access to read the secret
-resource "google_secret_manager_secret_iam_member" "access" {
-  project   = var.project
-  secret_id = google_secret_manager_secret.secret.id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:service-104387202021@gcp-sa-dataform.iam.gserviceaccount.com"
 }
