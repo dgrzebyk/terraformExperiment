@@ -10,13 +10,13 @@ from google.cloud import bigquery
 from datetime import date
 
 
-def get_fiscper(date):
+def get_fiscper(project_id, selected_date):
     """This function gets fiscal period matching the given date."""
-    bq_client = bigquery.Client("sales-forecasting-378609")
+    bq_client = bigquery.Client(project_id)
     query = f"""
         SELECT CAST(fiscper AS STRING) AS fiscper
-        FROM `sales-forecasting-378609.raw.fiscalCalendar`
-        WHERE '{date}' BETWEEN start_fiscperDate AND end_fiscperDate
+        FROM `{project_id}.raw.fiscalCalendar`
+        WHERE '{selected_date}' BETWEEN start_fiscperDate AND end_fiscperDate
     """
     fiscper = bq_client.query(query).to_dataframe().iloc[0, 0]
     return fiscper
@@ -65,7 +65,13 @@ def change_dtypes(df):
 @functions_framework.cloud_event
 def save_snp_a005_to_bq(cloud_event: CloudEvent):
     data = cloud_event.data
-    project_id = "sales-forecasting-378609"
+    for env_var in ['GOOGLE_CLOUD_PROJECT_ID', 'BQ_DATASET', 'BQ_TABLE']:
+        if not os.environ.get(env_var):
+            raise ValueError(f"{env_var} environment variable not set")
+
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID')
+    dataset_id = os.environ.get('BQ_DATASET')
+    table_id = os.environ.get('BQ_TABLE')
 
     # Variables required for logging
     event_id = cloud_event["id"]
@@ -89,7 +95,7 @@ def save_snp_a005_to_bq(cloud_event: CloudEvent):
 
         # Get current fiscal period
         dt = str(date.today())
-        creation_fiscper = get_fiscper(dt)
+        creation_fiscper = get_fiscper(project_id, dt)
         df['creation_fiscper'] = creation_fiscper
 
         df['file_name'] = file_name
@@ -102,12 +108,12 @@ def save_snp_a005_to_bq(cloud_event: CloudEvent):
         # Uploading the data
         schema = get_schema()
         df = change_dtypes(df)
-        table_id = f'{project_id}.allocation.SNP_A005'
+        bq_destination = f'{project_id}.{dataset_id}.{table_id}'
 
         # Preventing duplicates (creation_fiscper could be replaced with file name)
         query = f"""
             DELETE
-            FROM {table_id}
+            FROM {bq_destination}
             WHERE creation_fiscper = '{creation_fiscper}'
         """
         bq_client.query(query).result()
@@ -115,7 +121,7 @@ def save_snp_a005_to_bq(cloud_event: CloudEvent):
         print("Uploading data to BigQuery...")
         job_config = bigquery.LoadJobConfig(schema=schema)
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
-        job = bq_client.load_table_from_dataframe(df, table_id, job_config=job_config)
+        job = bq_client.load_table_from_dataframe(df, bq_destination, job_config=job_config)
         job.result()
         print("File loaded successfully!")
     else:

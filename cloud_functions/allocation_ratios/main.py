@@ -1,3 +1,4 @@
+import os
 import functions_framework
 import pandas as pd
 
@@ -8,7 +9,13 @@ from google.cloud import bigquery, storage
 @functions_framework.cloud_event
 def allocation_ratios(cloud_event: CloudEvent):
     data = cloud_event.data
-    project_id = "sales-forecasting-378609"
+    for env_var in ['GOOGLE_CLOUD_PROJECT_ID', 'BQ_DATASET', 'BQ_TABLE']:
+        if not os.environ.get(env_var):
+            raise ValueError(f"{env_var} environment variable not set")
+
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT_ID')
+    dataset_id = os.environ.get('BQ_DATASET')
+    table_id = os.environ.get('BQ_TABLE')
 
     # Variables required for logging
     event_id = cloud_event["id"]
@@ -44,12 +51,12 @@ def allocation_ratios(cloud_event: CloudEvent):
         bigquery.SchemaField('Horizon_6', 'FLOAT64')
     ]
 
-    table_id = f'{project_id}.allocation.ratios_temp'
+    bq_destination = f'{project_id}.{dataset_id}.{table_id}'
 
     # Preventing duplicates
     query = f"""
         DELETE
-        FROM `{table_id}`
+        FROM `{bq_destination}`
         WHERE creation_fiscper = '{df['creation_fiscper'].iloc[0]}'
     """
     bq_client = bigquery.Client(project_id)
@@ -58,7 +65,7 @@ def allocation_ratios(cloud_event: CloudEvent):
     print("Uploading data to BigQuery...")
     job_config = bigquery.LoadJobConfig(schema=schema)
     job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
-    job = bq_client.load_table_from_dataframe(df, table_id, job_config=job_config)
+    job = bq_client.load_table_from_dataframe(df, bq_destination, job_config=job_config)
     job.result()
     print(f'{file_name} successfully uploaded to BigQuery.')
 
