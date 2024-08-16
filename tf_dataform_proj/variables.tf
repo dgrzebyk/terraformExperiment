@@ -3,10 +3,6 @@ variable "project" {
   type        = string
 }
 
-variable "bq_datasets" {
-  default = ["allocation", "allocation_assertions"]
-}
-
 variable "github_token" {
   type        = string
   sensitive   = true
