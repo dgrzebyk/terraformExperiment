@@ -60,10 +60,162 @@ resource "google_dataform_repository_workflow_config" "workflow" {
 }
 
 # Create BigQuery tables to be populated by Dataform
-resource "google_bigquery_dataset" "bigquery_datasets" {
-  for_each      = toset(var.bq_datasets)
-  dataset_id    = each.value
-  friendly_name = each.value
+resource "google_bigquery_dataset" "allocation" {
+  dataset_id    = "allocation"
   location      = local.region
   project       = var.project
+}
+
+resource "google_bigquery_dataset" "allocation_assertions" {
+  dataset_id    = "allocation_assertions"
+  location      = local.region
+  project       = var.project
+}
+
+resource "google_bigquery_table" "ratios_temp" {
+  dataset_id = google_bigquery_dataset.allocation.dataset_id
+  table_id   = "ratios_temp"
+  deletion_protection = true
+  schema = <<EOF
+[
+  {
+    "name": "creation_fiscper",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "division",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "pm",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "finishing_group",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Horizon_1",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Horizon_2",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Horizon_3",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Horizon_4",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Horizon_5",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Horizon_6",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  }
+]
+EOF
+
+}
+
+resource "google_bigquery_table" "SNP_A005" {
+  dataset_id = google_bigquery_dataset.allocation.dataset_id
+  table_id   = "SNP_A005"
+  deletion_protection = true
+  schema = <<EOF
+[
+  {
+    "name": "Production_week",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "DC",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "DC_Desc_",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "Finishing_group",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "PM",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "B_I__KG_",
+    "type": "FLOAT64",
+    "mode": "NULLABLE"
+  },
+  {
+    "name": "Recalculated_S_OP_Plan__KG_",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Check",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Allocation_Key",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "Allocation_Qty__KG_",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "creation_fiscper",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  },
+  {
+    "name": "file_name",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": ""
+  }
+]
+EOF
+
 }
